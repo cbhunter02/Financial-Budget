@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#000000" />
+  <title>Financial Recovery Dashboard</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <div class="kicker">Financial Recovery System</div>
+      <h1>Six Month<br/>Money Map</h1>
+      <p>Minimal dashboard for income, bills, debt payoff, savings funds, trading payouts, and move readiness.</p>
+    </header>
+
+    <div class="scenario-strip" id="scenarioStrip"></div>
+
+    <main class="view active" id="view-home">
+      <section class="card">
+        <div class="card-head">
+          <h2>Home</h2>
+          <span id="activeScenarioLabel"></span>
+        </div>
+
+        <div class="quick-edit">
+          <label>Hourly Pay <div class="money-input"><span>$</span><input id="homeHourly" type="number" step="0.01"></div></label>
+          <label>Hours / Week <input id="homeHours" type="number" step="0.5"></label>
+          <label>Deduction % <input id="homeDeduction" type="number" step="0.5"></label>
+          <label>Biweekly Net <div class="money-input"><span>$</span><input id="homeBiweeklyNet" type="number"></div></label>
+        </div>
+
+        <div class="metric-grid">
+          <div class="metric"><span>Net Income</span><strong id="monthlyIncome">$0</strong></div>
+          <div class="metric"><span>Expenses</span><strong id="monthlyExpenses">$0</strong></div>
+          <div class="metric"><span>Surplus</span><strong id="monthlySurplus">$0</strong></div>
+          <div class="metric"><span>Safety Status</span><strong id="safetyStatus">—</strong></div>
+        </div>
+        <div id="statusCard" class="status"></div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>Balances After 6 Months</h2>
+          <span>Live forecast</span>
+        </div>
+        <div class="metric-grid">
+          <div class="metric"><span>Mom Debt Left</span><strong id="momDebt6">$0</strong></div>
+          <div class="metric"><span>Your Debt Left</span><strong id="personalDebt6">$0</strong></div>
+          <div class="metric"><span>Emergency</span><strong id="emergency6">$0</strong></div>
+          <div class="metric"><span>Move Cushion</span><strong id="moveCushion6">$0</strong></div>
+          <div class="metric"><span>Travel Fund</span><strong id="travel6">$0</strong></div>
+          <div class="metric"><span>Car Fund</span><strong id="car6">$0</strong></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>Goal Progress</h2>
+          <span id="readinessSmall">0%</span>
+        </div>
+        <div id="goalBars"></div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>Timeline</h2>
+          <span>Payoff estimate</span>
+        </div>
+        <div class="table" id="timelineTable"></div>
+      </section>
+    </main>
+
+    <main class="view" id="view-pay">
+      <section class="card">
+        <div class="card-head">
+          <h2>Job Setup</h2>
+          <span>Edit current tab</span>
+        </div>
+        <label class="input-row">Job Name <input id="jobName" type="text"></label>
+        <label class="input-row">Hourly Pay <div class="money-input"><span>$</span><input id="hourlyPay" type="number" step="0.01"></div></label>
+        <label class="input-row">Hours / Week <input id="hoursWeek" type="number" step="0.5"></label>
+        <label class="input-row">Estimated Deductions % <input id="deductionRate" type="number" step="0.5"></label>
+        <label class="input-row">Use Manual Net Pay <select id="manualNetOn"><option value="no">No</option><option value="yes">Yes</option></select></label>
+        <label class="input-row">Manual Biweekly Net <div class="money-input"><span>$</span><input id="manualBiweeklyNet" type="number"></div></label>
+        <p class="note">When your first real paycheck hits, turn manual net pay on and enter the exact deposit.</p>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>Paycheck Checklist</h2>
+          <span id="biweeklyAmount">$0/check</span>
+        </div>
+        <h3>Check 1 · Beginning of Month</h3>
+        <div class="table" id="checkOneTable"></div>
+        <h3>Check 2 · End of Month</h3>
+        <div class="table" id="checkTwoTable"></div>
+        <div class="status good" id="navyNote"></div>
+      </section>
+    </main>
+
+    <main class="view" id="view-bills">
+      <section class="card">
+        <div class="card-head">
+          <h2>Bills + Funds</h2>
+          <span id="expenseTotalLabel">$0</span>
+        </div>
+        <div class="preset-grid">
+          <button class="mini-btn" data-preset="bill">Add Bill</button>
+          <button class="mini-btn" data-preset="debt">Add Debt</button>
+          <button class="mini-btn" data-preset="savings">Add Savings</button>
+          <button class="mini-btn" data-preset="car">Add Car</button>
+        </div>
+        <div id="expenseList" class="expense-list"></div>
+        <button class="primary-btn" id="addExpenseBtn">Add Custom Expense</button>
+        <p class="note">Categories connect the math: Mom Debt, Personal Debt, Emergency, Travel, Car Fund, Move Fund, and Regular Bills.</p>
+      </section>
+    </main>
+
+    <main class="view" id="view-addons">
+      <section class="card">
+        <div class="card-head">
+          <h2>Trading Add-On</h2>
+          <span>Optional</span>
+        </div>
+        <label class="input-row">Use Trading <select id="tradingOn"><option value="no">No</option><option value="yes">Yes</option></select></label>
+        <label class="input-row">Profit Target / Day <div class="money-input"><span>$</span><input id="profitDay" type="number" value="300"></div></label>
+        <label class="input-row">Trading Days / Week <input id="tradeDays" type="number" value="4"></label>
+        <label class="input-row">Win Rate % <input id="winRate" type="number" value="75"></label>
+        <label class="input-row">Payout Split % <input id="payoutSplit" type="number" value="80"></label>
+        <label class="input-row">Realism Haircut % <input id="haircut" type="number" value="20"></label>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>Payout Splitter</h2>
+          <span>When payout hits</span>
+        </div>
+        <label class="input-row">Payout Amount <div class="money-input"><span>$</span><input id="payoutAmount" type="number" value="0"></div></label>
+        <label class="input-row">Mom % <input id="splitMom" type="number" value="50"></label>
+        <label class="input-row">Personal Debt % <input id="splitPersonal" type="number" value="25"></label>
+        <label class="input-row">Emergency % <input id="splitEmergency" type="number" value="15"></label>
+        <label class="input-row">Travel % <input id="splitTravel" type="number" value="5"></label>
+        <label class="input-row">Car Fund % <input id="splitCar" type="number" value="5"></label>
+        <div class="table" id="payoutSplitTable"></div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>Part-Time Add-On</h2>
+          <span>Optional</span>
+        </div>
+        <label class="input-row">Use Part-Time <select id="partTimeOn"><option value="no">No</option><option value="yes">Yes</option></select></label>
+        <label class="input-row">Hourly Pay <div class="money-input"><span>$</span><input id="ptRate" type="number" value="20"></div></label>
+        <label class="input-row">Hours / Week <input id="ptHours" type="number" value="12"></label>
+        <label class="input-row">Flat Monthly Override <div class="money-input"><span>$</span><input id="ptFlat" type="number" value="1000"></div></label>
+      </section>
+    </main>
+
+    <main class="view" id="view-goals">
+      <section class="card">
+        <div class="card-head">
+          <h2>Starting Balances</h2>
+          <span>Editable</span>
+        </div>
+        <label class="input-row">Mom Debt Balance <div class="money-input"><span>$</span><input id="momDebtStart" type="number" value="25000"></div></label>
+        <label class="input-row">Personal Debt Balance <div class="money-input"><span>$</span><input id="personalDebtStart" type="number" value="5000"></div></label>
+        <label class="input-row">Emergency Savings <div class="money-input"><span>$</span><input id="emergencyStart" type="number" value="0"></div></label>
+        <label class="input-row">Travel Fund <div class="money-input"><span>$</span><input id="travelStart" type="number" value="0"></div></label>
+        <label class="input-row">Car Fund <div class="money-input"><span>$</span><input id="carStart" type="number" value="0"></div></label>
+        <label class="input-row">Move Fund <div class="money-input"><span>$</span><input id="moveStart" type="number" value="0"></div></label>
+        <label class="input-row">Closing Cushion <div class="money-input"><span>$</span><input id="closingCushion" type="number" value="440"></div></label>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>6 Month Targets</h2>
+          <span>Realistic</span>
+        </div>
+        <label class="input-row">Mom Debt Paid Goal <div class="money-input"><span>$</span><input id="momGoal" type="number" value="12000"></div></label>
+        <label class="input-row">Personal Debt Paid Goal <div class="money-input"><span>$</span><input id="personalGoal" type="number" value="3000"></div></label>
+        <label class="input-row">Emergency Goal <div class="money-input"><span>$</span><input id="emergencyGoal" type="number" value="5000"></div></label>
+        <label class="input-row">Move Cushion Goal <div class="money-input"><span>$</span><input id="moveGoal" type="number" value="10000"></div></label>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>Apartment Readiness</h2>
+          <span>Live score</span>
+        </div>
+        <div class="readiness" id="readiness">0%</div>
+        <p id="readinessText" class="note"></p>
+        <div class="table" id="predictionTable"></div>
+      </section>
+
+      <button class="secondary-btn" id="resetBtn">Reset Saved Data</button>
+    </main>
+  </div>
+
+  <nav class="bottom-nav">
+    <button class="nav active" data-view="home">Home</button>
+    <button class="nav" data-view="pay">Pay</button>
+    <button class="nav" data-view="bills">Bills</button>
+    <button class="nav" data-view="addons">Add</button>
+    <button class="nav" data-view="goals">Goals</button>
+  </nav>
+
+  <script src="app.js"></script>
+</body>
+</html>
